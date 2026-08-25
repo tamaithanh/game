@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Đấu Trường Kết Nối - Bài 8 Tin 10 KNTT</title>
+<style>
+:root{
+  --bg1:#eaf4ff; --bg2:#f6efff; --card:#ffffffee; --ink:#172033;
+  --muted:#60708a; --primary:#3568ff; --secondary:#7b45e8;
+  --success:#17a566; --danger:#e94d59; --warning:#f2a318; --line:#dbe3f1;
+}
+*{box-sizing:border-box}
+body{
+  margin:0; min-height:100vh; font-family:Inter,Segoe UI,Arial,sans-serif;
+  color:var(--ink);
+  background:
+    radial-gradient(circle at 15% 15%, #d7efff 0 12%, transparent 35%),
+    radial-gradient(circle at 85% 20%, #efe1ff 0 14%, transparent 40%),
+    linear-gradient(135deg,var(--bg1),var(--bg2));
+}
+button,input,select{font:inherit}
+.app{max-width:1220px;margin:auto;padding:18px}
+.hero{
+  background:linear-gradient(135deg,#194fc7,#7d3ee8);
+  color:white;border-radius:28px;padding:24px 28px;box-shadow:0 18px 45px #3152a52a;
+  display:flex;justify-content:space-between;gap:20px;align-items:center;
+}
+.hero h1{margin:0;font-size:clamp(28px,4vw,48px);letter-spacing:.4px}
+.hero p{margin:8px 0 0;opacity:.94;font-weight:600}
+.sound-toggle{
+  border:1px solid #ffffff80;background:#ffffff18;color:white;border-radius:999px;
+  padding:10px 16px;font-weight:800;cursor:pointer;white-space:nowrap;
+}
+.layout{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(300px,.8fr);gap:18px;margin-top:18px}
+.card{
+  background:var(--card);border:1px solid #fff;border-radius:24px;
+  box-shadow:0 12px 32px #43547a18;padding:20px;
+}
+.hidden{display:none!important}
+.round-pill{
+  display:inline-flex;align-items:center;gap:8px;background:#e9efff;color:#284bb5;
+  border-radius:999px;padding:8px 13px;font-size:14px;font-weight:900
+}
+h2{font-size:27px;margin:12px 0 8px}
+.muted{color:var(--muted)}
+.progress{height:12px;background:#e7edf6;border-radius:99px;overflow:hidden;margin:14px 0 20px}
+.progress>div{height:100%;width:0;background:linear-gradient(90deg,var(--primary),var(--secondary));transition:.35s}
+.question{
+  min-height:128px;border:1px solid var(--line);border-radius:20px;padding:22px;
+  background:linear-gradient(180deg,#fff,#fbfcff);
+}
+.question .label{font-size:13px;font-weight:900;text-transform:uppercase;color:#72809a}
+.question .text{font-size:clamp(22px,3vw,34px);font-weight:900;line-height:1.35;margin-top:8px}
+.options{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
+.option{
+  border:2px solid #d8e0ec;background:#fff;border-radius:17px;padding:16px;
+  text-align:left;font-weight:800;cursor:pointer;transition:.18s;min-height:60px
+}
+.option:hover{transform:translateY(-2px);border-color:#a4b9ef;box-shadow:0 8px 20px #53668c17}
+.option.selected{border-color:var(--primary);background:#eef3ff}
+.option.correct{border-color:var(--success);background:#eaf9f2;color:#0b7448}
+.option.wrong{border-color:var(--danger);background:#fff0f2;color:#ac2735}
+.answer{
+  margin-top:14px;border-radius:16px;padding:14px 16px;font-weight:800;
+  background:#eefaf4;border:1px solid #bfe8d2;color:#0d7048
+}
+.controls{display:flex;flex-wrap:wrap;gap:9px;margin-top:16px}
+.btn{border:none;border-radius:14px;padding:11px 15px;font-weight:900;cursor:pointer;transition:.15s}
+.btn:hover{transform:translateY(-1px)}
+.primary{background:var(--primary);color:white}
+.secondary{background:var(--secondary);color:white}
+.success{background:var(--success);color:white}
+.danger{background:var(--danger);color:white}
+.warning{background:var(--warning);color:white}
+.ghost{background:#eef1f6;color:#344156}
+.sidebar h3{margin-top:0}
+.team{
+  border:1px solid var(--line);border-radius:17px;padding:12px;margin:9px 0;background:#fff;
+  display:flex;justify-content:space-between;align-items:center;gap:10px
+}
+.team b{font-size:17px}.score{font-size:22px;font-weight:1000;color:#214fca}
+.award-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.award-grid button{width:100%;font-size:13px}
+.setup-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:14px}
+.setup-team{border:1px solid var(--line);border-radius:16px;padding:12px;background:#fff}
+.setup-team input{width:100%;border:1px solid #ccd6e5;border-radius:12px;padding:10px}
+.rules{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:16px 0}
+.rule{border-radius:18px;padding:13px;background:#f6f8ff;border:1px solid #e0e5f2;font-weight:800}
+.center{text-align:center}
+.timer{
+  display:inline-flex;align-items:center;justify-content:center;min-width:130px;
+  font-size:34px;font-weight:1000;border-radius:18px;padding:10px 18px;
+  background:#fff7e9;border:2px dashed #f3a126;color:#b85a00;margin:8px 0
+}
+.timer.danger-time{animation:pulse .65s infinite;background:#fff0f1;color:#b91f2d;border-color:#e94d59}
+@keyframes pulse{50%{transform:scale(1.045)}}
+.final-match{display:grid;grid-template-columns:1fr 180px;gap:10px;align-items:center;border:1px solid var(--line);border-radius:15px;padding:12px;margin:9px 0;background:#fff}
+.final-match select{border:1px solid #cdd6e5;border-radius:11px;padding:9px}
+.toast{
+  position:fixed;left:50%;top:28px;transform:translate(-50%,-20px);
+  background:#16213a;color:white;padding:13px 19px;border-radius:999px;font-weight:900;
+  box-shadow:0 14px 35px #18253a45;opacity:0;pointer-events:none;transition:.25s;z-index:20
+}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.rank{
+  display:flex;justify-content:space-between;align-items:center;background:#fff;
+  border:1px solid var(--line);padding:15px 18px;border-radius:17px;margin:10px 0;font-weight:900
+}
+.confetti{position:fixed;inset:0;pointer-events:none;overflow:hidden}
+.confetti i{position:absolute;top:-20px;width:9px;height:16px;border-radius:3px;animation:fall 2.2s linear forwards}
+@keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+@media(max-width:900px){.layout{grid-template-columns:1fr}.rules{grid-template-columns:1fr 1fr}.hero{align-items:flex-start;flex-direction:column}.options{grid-template-columns:1fr}}
+@media(max-width:580px){.setup-grid,.award-grid,.rules{grid-template-columns:1fr}.final-match{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div id="toast" class="toast"></div>
+<div id="confetti" class="confetti"></div>
+
+<div class="app">
+  <section class="hero">
+    <div>
+      <h1>🎮 ĐẤU TRƯỜNG KẾT NỐI</h1>
+      <p>Bài 8 – Mạng máy tính trong cuộc sống hiện đại • Tin học 10 – KNTT</p>
+    </div>
+    <button id="soundBtn" class="sound-toggle" onclick="toggleSound()">🔊 Âm thanh: BẬT</button>
+  </section>
+
+  <section id="startScreen" class="card" style="margin-top:18px">
+    <h2>🚀 Chuẩn bị vào game</h2>
+    <p class="muted">Chia lớp thành 4 đội. Giáo viên điều khiển câu hỏi và cộng điểm cho đội trả lời đúng.</p>
+
+    <div class="rules">
+      <div class="rule">⚡ Vòng 1<br><span class="muted">LAN • Router • Internet</span></div>
+      <div class="rule">☁️ Vòng 2<br><span class="muted">Điện toán đám mây</span></div>
+      <div class="rule">📡 Vòng 3<br><span class="muted">IoT hay không?</span></div>
+      <div class="rule">🔥 Vòng 4<br><span class="muted">Cứu mạng trường học</span></div>
+    </div>
+
+    <div class="setup-grid">
+      <div class="setup-team"><b>Đội 1</b><input id="name0" value="🌐 Internet"></div>
+      <div class="setup-team"><b>Đội 2</b><input id="name1" value="☁️ Cloud"></div>
+      <div class="setup-team"><b>Đội 3</b><input id="name2" value="📡 IoT"></div>
+      <div class="setup-team"><b>Đội 4</b><input id="name3" value="🖧 LAN"></div>
+    </div>
+
+    <div class="center" style="margin-top:20px">
+      <button class="btn primary" onclick="startGame()">▶ BẮT ĐẦU GAME</button>
+    </div>
+  </section>
+
+  <section id="gameScreen" class="layout hidden">
+    <main class="card">
+      <span id="roundPill" class="round-pill">Vòng 1</span>
+      <h2 id="roundTitle"></h2>
+      <div class="progress"><div id="progressBar"></div></div>
+      <div id="questionArea"></div>
+      <div class="controls">
+        <button class="btn ghost" onclick="prevQuestion()">← Câu trước</button>
+        <button class="btn secondary" onclick="revealAnswer()">👀 Hiện đáp án</button>
+        <button class="btn primary" onclick="nextQuestion()">Câu tiếp →</button>
+      </div>
+    </main>
+
+    <aside class="sidebar">
+      <div class="card">
+        <h3>🏆 Bảng điểm</h3>
+        <div id="scoreBoard"></div>
+      </div>
+      <div class="card" style="margin-top:18px">
+        <h3>➕ Cộng điểm</h3>
+        <div id="awardButtons" class="award-grid"></div>
+        <div class="controls">
+          <button class="btn danger" onclick="restartGame()">↻ Chơi lại</button>
+        </div>
+      </div>
+    </aside>
+  </section>
+
+  <section id="endScreen" class="card hidden" style="margin-top:18px">
+    <div class="center">
+      <div style="font-size:58px">🏆</div>
+      <h2>KẾT QUẢ CHUNG CUỘC</h2>
+      <p class="muted">Chúc mừng các đội đã hoàn thành Đấu trường kết nối!</p>
+    </div>
+    <div id="ranking"></div>
+    <div class="center"><button class="btn primary" onclick="restartGame()">🔁 Chơi lại</button></div>
+  </section>
+</div>
+
+<script>
+let soundOn = true, audioCtx = null;
+const teams = [
+  {name:"🌐 Internet",score:0},{name:"☁️ Cloud",score:0},
+  {name:"📡 IoT",score:0},{name:"🖧 LAN",score:0}
+];
+
+const rounds = [
+{
+  tag:"Vòng 1", title:"⚡ Ai nhanh hơn",
+  questions:[
+    {type:"mcq",points:10,q:"Mạng có phạm vi nhỏ trong gia đình, trường học hoặc cơ quan thường gọi là gì?",options:["Internet","LAN","IoT","Cloud"],answer:"LAN"},
+    {type:"mcq",points:10,q:"Thiết bị nào thường dùng để kết nối các mạng với nhau và định tuyến dữ liệu?",options:["Router","Bàn phím","Máy in","Webcam"],answer:"Router"},
+    {type:"mcq",points:10,q:"Internet là mạng máy tính có phạm vi như thế nào?",options:["Một phòng","Một trường","Một thành phố","Toàn cầu"],answer:"Toàn cầu"},
+    {type:"mcq",points:10,q:"Trong mạng cục bộ, thiết bị nào thường giúp kết nối nhiều thiết bị trong cùng mạng?",options:["Switch","Micro","Máy chiếu","Scanner"],answer:"Switch"}
+  ]
+},
+{
+  tag:"Vòng 2", title:"☁️ Giải mã đám mây",
+  questions:[
+    {type:"guess",points:10,q:"Sử dụng phần mềm trực tuyến qua Internet mà không cần tự cài đặt và vận hành hạ tầng tương ứng là mô hình nào?",answer:"SaaS – Phần mềm như một dịch vụ"},
+    {type:"guess",points:10,q:"Mô hình cung cấp nền tảng để phát triển và triển khai ứng dụng gọi là gì?",answer:"PaaS – Nền tảng như một dịch vụ"},
+    {type:"guess",points:10,q:"Mô hình cung cấp tài nguyên hạ tầng tính toán qua Internet gọi là gì?",answer:"IaaS – Hạ tầng như một dịch vụ"},
+    {type:"guess",points:20,q:"BONUS: Việc cung cấp tài nguyên tính toán theo nhu cầu qua Internet được gọi chung là gì?",answer:"Điện toán đám mây"}
+  ]
+},
+{
+  tag:"Vòng 3", title:"📡 IoT hay không IoT?",
+  questions:[
+    {type:"choice",points:10,q:"Đồng hồ thông minh gửi dữ liệu sức khỏe lên điện thoại.",options:["IoT","Không phải IoT"],answer:"IoT"},
+    {type:"choice",points:10,q:"Cảm biến nhiệt độ tự gửi dữ liệu về hệ thống.",options:["IoT","Không phải IoT"],answer:"IoT"},
+    {type:"choice",points:10,q:"Máy tính bỏ túi chỉ dùng độc lập để tính toán.",options:["IoT","Không phải IoT"],answer:"Không phải IoT"},
+    {type:"choice",points:10,q:"Camera thông minh có thể truyền dữ liệu qua mạng.",options:["IoT","Không phải IoT"],answer:"IoT"},
+    {type:"choice",points:10,q:"Quạt điện thông thường chỉ bật bằng công tắc cơ.",options:["IoT","Không phải IoT"],answer:"Không phải IoT"}
+  ]
+},
+{
+  tag:"Vòng 4", title:"🔥 Cứu mạng trường học",
+  questions:[
+    {type:"final",points:40,q:"Trong 60 giây, hãy ghép đúng giải pháp cho từng nhu cầu của nhà trường.",
+     tasks:[
+      ["Kết nối các máy tính trong một phòng máy","LAN"],
+      ["Kết nối các mạng và truy cập Internet","Router"],
+      ["Lưu trữ và sử dụng tài liệu trực tuyến","Cloud"],
+      ["Cảm biến nhiệt độ tự gửi dữ liệu","IoT"]
+     ]}
+  ]
+}
+];
+
+let r=0,q=0,selected=null,timerId=null,timeLeft=60;
+
+function ensureAudio(){
+  if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+  if(audioCtx.state==="suspended") audioCtx.resume();
+}
+function tone(freq,duration=0.12,type="sine",gain=.08,delay=0){
+  if(!soundOn) return;
+  ensureAudio();
+  const o=audioCtx.createOscillator(), g=audioCtx.createGain();
+  o.type=type;o.frequency.value=freq;g.gain.value=gain;
+  o.connect(g);g.connect(audioCtx.destination);
+  const t=audioCtx.currentTime+delay;
+  o.start(t);g.gain.setValueAtTime(gain,t);g.gain.exponentialRampToValueAtTime(.001,t+duration);
+  o.stop(t+duration);
+}
+function sClick(){tone(520,.06,"sine",.035)}
+function sCorrect(){tone(523,.12,"sine",.07);tone(659,.12,"sine",.07,.12);tone(784,.18,"sine",.07,.24)}
+function sWrong(){tone(210,.15,"sawtooth",.055);tone(165,.18,"sawtooth",.04,.13)}
+function sTick(){tone(850,.045,"square",.025)}
+function sWin(){
+  [523,659,784,1047].forEach((f,i)=>tone(f,.2,"sine",.07,i*.14));
+  setTimeout(confetti,120);
+}
+function toggleSound(){
+  soundOn=!soundOn;
+  document.getElementById("soundBtn").textContent=soundOn?"🔊 Âm thanh: BẬT":"🔇 Âm thanh: TẮT";
+  if(soundOn){ensureAudio();sClick()}
+}
+function toast(msg){
+  const t=document.getElementById("toast");t.textContent=msg;t.classList.add("show");
+  setTimeout(()=>t.classList.remove("show"),1400);
+}
+function confetti(){
+  const box=document.getElementById("confetti");box.innerHTML="";
+  const colors=["#3568ff","#7b45e8","#17a566","#f2a318","#e94d59"];
+  for(let i=0;i<70;i++){
+    const el=document.createElement("i");
+    el.style.left=Math.random()*100+"vw";
+    el.style.background=colors[Math.floor(Math.random()*colors.length)];
+    el.style.animationDelay=Math.random()*.45+"s";
+    el.style.transform=`rotate(${Math.random()*360}deg)`;
+    box.appendChild(el);
+  }
+  setTimeout(()=>box.innerHTML="",3000);
+}
+function startGame(){
+  ensureAudio();sClick();
+  teams.forEach((t,i)=>{t.name=document.getElementById("name"+i).value.trim()||("Đội "+(i+1));t.score=0});
+  r=0;q=0;
+  document.getElementById("startScreen").classList.add("hidden");
+  document.getElementById("endScreen").classList.add("hidden");
+  document.getElementById("gameScreen").classList.remove("hidden");
+  renderScore();renderAwards();renderQuestion();
+}
+function renderScore(){
+  const sorted=[...teams].sort((a,b)=>b.score-a.score);
+  document.getElementById("scoreBoard").innerHTML=sorted.map((t,i)=>`
+    <div class="team"><b>${i+1}. ${t.name}</b><span class="score">${t.score}</span></div>`).join("");
+}
+function renderAwards(){
+  document.getElementById("awardButtons").innerHTML=teams.map((t,i)=>`
+    <button class="btn success" onclick="award(${i})">${t.name}</button>`).join("");
+}
+function award(i){
+  const item=rounds[r].questions[q];
+  teams[i].score+=item.points;renderScore();sCorrect();toast(`+${item.points} điểm cho ${teams[i].name}`);
+}
+function totalQuestions(){return rounds.reduce((s,x)=>s+x.questions.length,0)}
+function indexNow(){return rounds.slice(0,r).reduce((s,x)=>s+x.questions.length,0)+q}
+function renderQuestion(){
+  stopTimer();selected=null;
+  const round=rounds[r], item=round.questions[q];
+  document.getElementById("roundPill").textContent=round.tag;
+  document.getElementById("roundTitle").textContent=round.title;
+  document.getElementById("progressBar").style.width=(indexNow()/totalQuestions()*100)+"%";
+  let html=`<div class="question">
+      <div class="label">Câu ${q+1} • ${item.points} điểm</div>
+      <div class="text">${item.q}</div>
+    </div>`;
+  if(item.options){
+    html+=`<div class="options">${item.options.map((x,i)=>`<button class="option" id="opt${i}" onclick="choose(${i},'${escapeJS(x)}')">${x}</button>`).join("")}</div>`;
+  }else if(item.type==="guess"){
+    html+=`<div class="answer hidden" id="answerBox"></div>`;
+  }else if(item.type==="final"){
+    html+=`<div class="center"><div id="timer" class="timer">⏱ 60</div></div>
+      <div class="center"><button class="btn warning" onclick="startTimer()">▶ Bắt đầu 60 giây</button></div>`;
+    html+=item.tasks.map((x,i)=>`<div class="final-match"><b>${i+1}. ${x[0]}</b>
+      <select id="m${i}"><option value="">-- Chọn --</option><option>LAN</option><option>Router</option><option>Cloud</option><option>IoT</option></select></div>`).join("");
+    html+=`<div class="center" style="margin-top:14px"><button class="btn primary" onclick="checkFinal()">✅ KIỂM TRA</button></div>
+      <div class="answer hidden" id="answerBox"></div>`;
+  }
+  if(item.options) html+=`<div class="answer hidden" id="answerBox"></div>`;
+  document.getElementById("questionArea").innerHTML=html;
+}
+function escapeJS(s){return s.replace(/\\/g,"\\\\").replace(/'/g,"\\'")}
+function choose(i,val){
+  sClick();selected=val;
+  document.querySelectorAll(".option").forEach(x=>x.classList.remove("selected"));
+  document.getElementById("opt"+i).classList.add("selected");
+}
+function revealAnswer(){
+  const item=rounds[r].questions[q], box=document.getElementById("answerBox");
+  if(item.type==="final"){
+    box.innerHTML=item.tasks.map((x,i)=>`${i+1}. ${x[0]} → <b>${x[1]}</b>`).join("<br>");
+    box.classList.remove("hidden");return;
+  }
+  box.innerHTML=`✅ Đáp án: <b>${item.answer}</b>`;
+  box.classList.remove("hidden");
+  if(selected!==null){
+    document.querySelectorAll(".option").forEach((el,i)=>{
+      if(el.textContent.trim()===item.answer) el.classList.add("correct");
+      else if(el.textContent.trim()===selected && selected!==item.answer) el.classList.add("wrong");
+    });
+    selected===item.answer?sCorrect():sWrong();
+  } else sClick();
+}
+function nextQuestion(){
+  sClick();
+  if(q<rounds[r].questions.length-1) q++;
+  else if(r<rounds.length-1){r++;q=0}
+  else return finish();
+  renderQuestion();
+}
+function prevQuestion(){
+  sClick();
+  if(q>0) q--;
+  else if(r>0){r--;q=rounds[r].questions.length-1}
+  renderQuestion();
+}
+function startTimer(){
+  ensureAudio();stopTimer();timeLeft=60;updateTimer();
+  timerId=setInterval(()=>{
+    timeLeft--;updateTimer();
+    if(timeLeft<=10 && timeLeft>0)sTick();
+    if(timeLeft<=0){stopTimer();sWrong();toast("⏰ Hết giờ!")}
+  },1000)
+}
+function updateTimer(){
+  const el=document.getElementById("timer");if(!el)return;
+  el.textContent="⏱ "+timeLeft;
+  el.classList.toggle("danger-time",timeLeft<=10);
+}
+function stopTimer(){if(timerId){clearInterval(timerId);timerId=null}}
+function checkFinal(){
+  const item=rounds[r].questions[q];let ok=0,lines=[];
+  item.tasks.forEach((x,i)=>{
+    const v=document.getElementById("m"+i).value;
+    const good=v===x[1]; if(good)ok++;
+    lines.push(`${i+1}. ${x[0]} → <b>${v||"chưa chọn"}</b> ${good?"✅":"❌"}`);
+  });
+  const box=document.getElementById("answerBox");
+  box.innerHTML=`<b>Kết quả: ${ok}/4</b><br>${lines.join("<br>")}`;
+  box.classList.remove("hidden");
+  if(ok===4){sCorrect();confetti()}else sWrong();
+}
+function finish(){
+  stopTimer();
+  document.getElementById("gameScreen").classList.add("hidden");
+  document.getElementById("endScreen").classList.remove("hidden");
+  const ranked=[...teams].sort((a,b)=>b.score-a.score), medals=["🥇","🥈","🥉","🏅"];
+  document.getElementById("ranking").innerHTML=ranked.map((t,i)=>`
+    <div class="rank"><span>${medals[i]} ${t.name}</span><span class="score">${t.score} điểm</span></div>`).join("");
+  document.getElementById("progressBar").style.width="100%";
+  sWin();
+}
+function restartGame(){
+  stopTimer();sClick();
+  teams.forEach(t=>t.score=0);
+  document.getElementById("gameScreen").classList.add("hidden");
+  document.getElementById("endScreen").classList.add("hidden");
+  document.getElementById("startScreen").classList.remove("hidden");
+}
+</script>
+</body>
+</html>
